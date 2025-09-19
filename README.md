@@ -133,8 +133,8 @@ https://outlook.live.com/owa/calendar/[calendar-id]/reachcalendar/calendar.ics
 squarecandy-acf-events-ics-import/
 ├── squarecandy-acf-events-ics-import.php  # Main plugin file
 ├── inc/
-│   ├── class-ics-parser.php               # ICS parsing functionality
-│   ├── class-event-importer.php           # Event creation logic
+│   ├── class-sqcdy-ics-parser.php         # ICS parsing functionality
+│   ├── class-sqcdy-event-importer.php     # Event creation logic
 │   └── admin-pages.php                    # Admin interface
 └── README.md
 ```
