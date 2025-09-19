@@ -53,10 +53,10 @@ function sqcdy_ics_import_init() {
     }
 
     // Load plugin files
-    require_once SQCDY_ICS_IMPORT_DIR . 'includes/class-ics-parser.php';
-    require_once SQCDY_ICS_IMPORT_DIR . 'includes/class-event-importer.php';
-    require_once SQCDY_ICS_IMPORT_DIR . 'includes/admin-pages.php';
-    require_once SQCDY_ICS_IMPORT_DIR . 'includes/admin-styles.php';
+    require_once SQCDY_ICS_IMPORT_DIR . 'inc/class-ics-parser.php';
+    require_once SQCDY_ICS_IMPORT_DIR . 'inc/class-event-importer.php';
+    require_once SQCDY_ICS_IMPORT_DIR . 'inc/admin-pages.php';
+    require_once SQCDY_ICS_IMPORT_DIR . 'inc/admin-styles.php';
 
     // Initialize admin
     if (is_admin()) {

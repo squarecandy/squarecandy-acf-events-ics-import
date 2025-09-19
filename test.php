@@ -9,7 +9,7 @@
 
 // Uncomment to test independently (make sure to include the parser file)
 /*
-require_once 'includes/class-ics-parser.php';
+require_once 'inc/class-ics-parser.php';
 
 // Test with the sample Google Calendar URL
 $test_url = 'https://calendar.google.com/calendar/ical/494h1li4bohjc380cl8bntq94k%40group.calendar.google.com/public/basic.ics';
