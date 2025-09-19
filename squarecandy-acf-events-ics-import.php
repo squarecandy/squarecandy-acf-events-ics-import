@@ -44,7 +44,7 @@ function sqcdy_ics_import_activate() {
 }
 
 // Initialize plugin
-add_action('plugins_loaded', 'sqcdy_ics_import_init');
+add_action('admin_init', 'sqcdy_ics_import_init', 999);
 function sqcdy_ics_import_init() {
     // Check dependencies
     if (!post_type_exists('event') || !function_exists('get_field')) {
