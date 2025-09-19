@@ -150,6 +150,16 @@ class SQCDY_Event_Importer {
 			return $result;
 		}
 
+		// Run the event data cleanup to generate archive_date, sort_date, and magic_sort_date
+		if ( function_exists( 'squarecandy_cleanup_event_data' ) ) {
+			$cleanup_result = squarecandy_cleanup_event_data( $post_id );
+			if ( ! $cleanup_result ) {
+				error_log( 'ICS Import: Failed to run squarecandy_cleanup_event_data for post ID: ' . $post_id );
+			}
+		} else {
+			error_log( 'ICS Import: squarecandy_cleanup_event_data function not available' );
+		}
+
 		// Store the UID for future reference
 		update_post_meta( $post_id, '_ics_uid', $ics_event['uid'] );
 		update_post_meta( $post_id, '_ics_last_import', current_time( 'mysql' ) );
