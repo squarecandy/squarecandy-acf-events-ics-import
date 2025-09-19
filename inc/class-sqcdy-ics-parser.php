@@ -57,24 +57,25 @@ class SQCDY_ICS_Parser {
 		error_log( 'ICS Import: Found ' . $vevent_count . ' BEGIN:VEVENT blocks' );
 
 		foreach ( $lines as $line ) {
-			$line = trim( $line );
-
-			// Handle line continuations (lines starting with space or tab)
+			// Check for line continuations BEFORE trimming (lines starting with space or tab)
 			if ( isset( $previous_line ) && ( 0 === strpos( $line, ' ' ) || 0 === strpos( $line, "\t" ) ) ) {
+				// This is a continuation line - append it to the previous line
 				$previous_line .= ltrim( $line );
 				continue;
 			}
 
+			// Process the previous complete line (if any)
 			if ( isset( $previous_line ) ) {
-				self::parse_line( $previous_line, $current_event, $in_event, $events );
+				self::parse_line( trim( $previous_line ), $current_event, $in_event, $events );
 			}
 
+			// Start building the new line (don't trim yet in case it has continuations)
 			$previous_line = $line;
 		}
 
 		// Process the last line
 		if ( isset( $previous_line ) ) {
-			self::parse_line( $previous_line, $current_event, $in_event, $events );
+			self::parse_line( trim( $previous_line ), $current_event, $in_event, $events );
 		}
 
 		error_log( 'ICS Import: Parsed ' . count( $events ) . ' events' );
@@ -147,7 +148,7 @@ class SQCDY_ICS_Parser {
 				break;
 
 			case 'DESCRIPTION':
-				$current_event['description'] = self::decode_ics_text( $value );
+				$current_event['description'] = self::decode_ics_description( $value );
 				break;
 
 			case 'LOCATION':
@@ -234,6 +235,51 @@ class SQCDY_ICS_Parser {
 
 		// Remove HTML tags from description
 		$text = wp_strip_all_tags( $text );
+
+		return trim( $text );
+	}
+
+	/**
+	 * Decode ICS description (handle escape sequences and preserve HTML)
+	 *
+	 * @param string $text Encoded ICS description text
+	 * @return string Decoded and sanitized description with HTML
+	 */
+	private static function decode_ics_description( $text ) {
+		// Decode common ICS escape sequences
+		$text = str_replace( array( '\\n', '\\,', '\\;', '\\\\' ), array( "\n", ',', ';', '\\' ), $text );
+
+		// Define allowed HTML tags for event descriptions
+		$allowed_html = array(
+			'p'      => array(
+				'class' => true,
+			),
+			'b'      => array(),
+			'strong' => array(),
+			'i'      => array(),
+			'em'     => array(),
+			'ul'     => array(),
+			'ol'     => array(),
+			'li'     => array(),
+			'a'      => array(
+				'href'   => true,
+				'title'  => true,
+				'target' => true,
+			),
+			'hr'     => array(),
+			'br'     => array(),
+		);
+
+		// Sanitize HTML while preserving allowed tags
+		$text = wp_kses( $text, $allowed_html );
+
+		// Try to fix any broken HTML tags
+		$text = force_balance_tags( $text );
+
+		// Convert remaining line breaks to <br> tags if not already in HTML paragraph format
+		if ( false === strpos( $text, '<p>' ) && false === strpos( $text, '</p>' ) ) {
+			$text = nl2br( $text );
+		}
 
 		return trim( $text );
 	}

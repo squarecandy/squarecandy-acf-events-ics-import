@@ -299,6 +299,11 @@ class SQCDY_Event_Importer {
 			update_field( 'country', $location_parts['country'], $post_id );
 		}
 
+		// Handle description data - add to short_description field as well as post content
+		if ( ! empty( $ics_event['description'] ) ) {
+			update_field( 'short_description', $ics_event['description'], $post_id );
+		}
+
 		return true;
 	}
 
