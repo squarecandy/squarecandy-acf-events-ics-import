@@ -108,7 +108,18 @@ function sqcdy_ics_import_admin_menu() {
 // Admin init
 function sqcdy_ics_import_admin_init() {
 	register_setting( 'sqcdy_ics_import', 'sqcdy_ics_import_feed_url' );
-	register_setting( 'sqcdy_ics_import', 'sqcdy_ics_import_default_category' );
 	register_setting( 'sqcdy_ics_import', 'sqcdy_ics_import_update_existing' );
 	register_setting( 'sqcdy_ics_import', 'sqcdy_ics_import_timezone' );
+
+	// Clean up legacy category option
+	sqcdy_ics_import_cleanup_legacy_options();
+}
+
+// Clean up legacy options that are no longer used
+function sqcdy_ics_import_cleanup_legacy_options() {
+	// Only run once to clean up the old category option
+	if ( ! get_option( 'sqcdy_ics_import_category_cleanup_done' ) ) {
+		delete_option( 'sqcdy_ics_import_default_category' );
+		update_option( 'sqcdy_ics_import_category_cleanup_done', true );
+	}
 }

@@ -16,10 +16,9 @@ class SQCDY_Event_Importer {
 	 */
 	public static function import_from_feed( $feed_url, $options = array() ) {
 		$defaults = array(
-			'update_existing'  => false,
-			'default_category' => '',
-			'dry_run'          => false,
-			'limit'            => 0,
+			'update_existing' => false,
+			'dry_run'         => false,
+			'limit'           => 0,
 		);
 
 		$options = wp_parse_args( $options, $defaults );
@@ -202,16 +201,6 @@ class SQCDY_Event_Importer {
 			'post_status'  => 'publish',
 			'post_author'  => get_current_user_id(),
 		);
-
-		// Set category if specified
-		if ( ! empty( $options['default_category'] ) ) {
-			$category_term = get_term_by( 'name', $options['default_category'], 'events-category' );
-			if ( $category_term ) {
-				$post_data['tax_input'] = array(
-					'events-category' => array( $category_term->term_id ),
-				);
-			}
-		}
 
 		return $post_data;
 	}

@@ -8,10 +8,9 @@
  * Main admin page
  */
 function sqcdy_ics_import_admin_page() {
-	$feed_url         = get_option( 'sqcdy_ics_import_feed_url', '' );
-	$default_category = get_option( 'sqcdy_ics_import_default_category', '' );
-	$update_existing  = get_option( 'sqcdy_ics_import_update_existing', false );
-	$timezone         = get_option( 'sqcdy_ics_import_timezone', get_option( 'timezone_string', 'America/New_York' ) );
+	$feed_url        = get_option( 'sqcdy_ics_import_feed_url', '' );
+	$update_existing = get_option( 'sqcdy_ics_import_update_existing', false );
+	$timezone        = get_option( 'sqcdy_ics_import_timezone', get_option( 'timezone_string', 'America/New_York' ) );
 
 	// Handle form submissions
 	if ( isset( $_POST['action'] ) && check_admin_referer( 'sqcdy_ics_import_nonce', '_wpnonce', false ) ) {
@@ -98,31 +97,6 @@ function sqcdy_ics_import_admin_page() {
 										<td>
 											<input type="url" id="feed_url" name="feed_url" value="<?php echo esc_attr( $feed_url ); ?>" class="regular-text" required>
 											<p class="description"><?php esc_html_e( 'Enter the URL of the ICS calendar feed to import', 'squarecandy-acf-events-ics-import' ); ?></p>
-										</td>
-									</tr>
-
-									<tr>
-										<th scope="row">
-											<label for="default_category"><?php esc_html_e( 'Default Category', 'squarecandy-acf-events-ics-import' ); ?></label>
-										</th>
-										<td>
-											<?php
-											$categories = get_terms(
-												array(
-													'taxonomy' => 'events-category',
-													'hide_empty' => false,
-												)
-											);
-											?>
-											<select id="default_category" name="default_category">
-												<option value=""><?php esc_html_e( 'No Category', 'squarecandy-acf-events-ics-import' ); ?></option>
-												<?php foreach ( $categories as $category ) : ?>
-													<option value="<?php echo esc_attr( $category->name ); ?>" <?php selected( $default_category, $category->name ); ?>>
-														<?php echo esc_html( $category->name ); ?>
-													</option>
-												<?php endforeach; ?>
-											</select>
-											<p class="description"><?php esc_html_e( 'Choose a default category for imported events', 'squarecandy-acf-events-ics-import' ); ?></p>
 										</td>
 									</tr>
 
@@ -280,10 +254,6 @@ function sqcdy_ics_import_save_settings() {
 		update_option( 'sqcdy_ics_import_feed_url', esc_url_raw( wp_unslash( $_POST['feed_url'] ) ) );
 	}
 
-	if ( isset( $_POST['default_category'] ) ) {
-		update_option( 'sqcdy_ics_import_default_category', sanitize_text_field( wp_unslash( $_POST['default_category'] ) ) );
-	}
-
 	update_option( 'sqcdy_ics_import_update_existing', isset( $_POST['update_existing'] ) );
 
 	if ( isset( $_POST['timezone'] ) ) {
@@ -312,10 +282,9 @@ function sqcdy_ics_import_preview() {
 	}
 
 	$options = array(
-		'update_existing'  => get_option( 'sqcdy_ics_import_update_existing', false ),
-		'default_category' => get_option( 'sqcdy_ics_import_default_category', '' ),
-		'dry_run'          => true,
-		'limit'            => 50, // Limit preview to 50 events
+		'update_existing' => get_option( 'sqcdy_ics_import_update_existing', false ),
+		'dry_run'         => true,
+		'limit'           => 50, // Limit preview to 50 events
 	);
 
 	return SQCDY_Event_Importer::import_from_feed( $feed_url, $options );
@@ -335,9 +304,8 @@ function sqcdy_ics_import_run() {
 	}
 
 	$options = array(
-		'update_existing'  => get_option( 'sqcdy_ics_import_update_existing', false ),
-		'default_category' => get_option( 'sqcdy_ics_import_default_category', '' ),
-		'dry_run'          => false,
+		'update_existing' => get_option( 'sqcdy_ics_import_update_existing', false ),
+		'dry_run'         => false,
 	);
 
 	return SQCDY_Event_Importer::import_from_feed( $feed_url, $options );
