@@ -37,12 +37,21 @@ class SQCDY_Event_Importer {
 		$events = SQCDY_ICS_Parser::parse_feed( $feed_url );
 
 		if ( false === $events ) {
-			$results['errors'][] = 'Failed to fetch or parse ICS feed';
+			$results['errors'][] = 'Failed to fetch or parse ICS feed. Check error logs for details.';
+			return $results;
+		}
+
+		if ( ! is_array( $events ) ) {
+			$results['errors'][] = 'Invalid response from ICS parser';
 			return $results;
 		}
 
 		$results['total_events'] = count( $events );
 		$results['messages'][]   = sprintf( 'Found %d events in ICS feed', count( $events ) );
+
+		if ( 0 === count( $events ) ) {
+			$results['messages'][] = 'No events were found in the ICS feed. The feed might be empty or contain no VEVENT blocks.';
+		}
 
 		// Limit events if specified
 		if ( $options['limit'] > 0 ) {

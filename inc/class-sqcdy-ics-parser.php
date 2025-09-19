@@ -14,17 +14,27 @@ class SQCDY_ICS_Parser {
 	 * @return array Array of parsed events or false on failure
 	 */
 	public static function parse_feed( $url ) {
-		$ics_content = wp_remote_get( $url );
+		$ics_content = wp_remote_get( $url, array( 'timeout' => 30 ) );
 
 		if ( is_wp_error( $ics_content ) ) {
+			error_log( 'ICS Import: Failed to fetch URL: ' . $ics_content->get_error_message() );
+			return false;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $ics_content );
+		if ( 200 !== $response_code ) {
+			error_log( 'ICS Import: HTTP error ' . $response_code . ' for URL: ' . $url );
 			return false;
 		}
 
 		$body = wp_remote_retrieve_body( $ics_content );
 
 		if ( empty( $body ) ) {
+			error_log( 'ICS Import: Empty response body for URL: ' . $url );
 			return false;
 		}
+
+		error_log( 'ICS Import: Fetched ' . strlen( $body ) . ' characters from URL: ' . $url );
 
 		return self::parse_ics_content( $body );
 	}
@@ -40,6 +50,11 @@ class SQCDY_ICS_Parser {
 		$lines         = explode( "\n", str_replace( "\r\n", "\n", $ics_content ) );
 		$current_event = null;
 		$in_event      = false;
+
+		error_log( 'ICS Import: Parsing content with ' . count( $lines ) . ' lines' );
+
+		$vevent_count = substr_count( $ics_content, 'BEGIN:VEVENT' );
+		error_log( 'ICS Import: Found ' . $vevent_count . ' BEGIN:VEVENT blocks' );
 
 		foreach ( $lines as $line ) {
 			$line = trim( $line );
@@ -61,6 +76,8 @@ class SQCDY_ICS_Parser {
 		if ( isset( $previous_line ) ) {
 			self::parse_line( $previous_line, $current_event, $in_event, $events );
 		}
+
+		error_log( 'ICS Import: Parsed ' . count( $events ) . ' events' );
 
 		return $events;
 	}

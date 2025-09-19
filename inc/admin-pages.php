@@ -20,12 +20,23 @@ function sqcdy_ics_import_admin_page() {
 			$preview_results = sqcdy_ics_import_preview();
 		} elseif ( 'import_run' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
 			$import_results = sqcdy_ics_import_run();
+		} elseif ( 'test_feed' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
+			$test_results = sqcdy_ics_import_test_feed();
 		}
 	}
 
 	?>
 	<div class="wrap sqcdy-ics-import-page">
 		<h1><?php esc_html_e( 'ICS Import for Events', 'squarecandy-acf-events-ics-import' ); ?></h1>
+
+		<?php if ( isset( $test_results ) ) : ?>
+			<div class="notice notice-info is-dismissible">
+				<h3><?php esc_html_e( 'Feed Test Results', 'squarecandy-acf-events-ics-import' ); ?></h3>
+				<?php foreach ( $test_results as $key => $value ) : ?>
+					<p><strong><?php echo esc_html( ucfirst( str_replace( '_', ' ', $key ) ) ); ?>:</strong> <?php echo esc_html( $value ); ?></p>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
 
 		<?php if ( isset( $import_results ) ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $import_results['success'] ? 'success' : 'error' ); ?> is-dismissible">
@@ -152,6 +163,12 @@ function sqcdy_ics_import_admin_page() {
 
 								<form method="post" action="" style="display: inline-block; margin-right: 10px;">
 									<?php wp_nonce_field( 'sqcdy_ics_import_nonce' ); ?>
+									<input type="hidden" name="action" value="test_feed">
+									<?php submit_button( __( 'Test Feed', 'squarecandy-acf-events-ics-import' ), 'secondary', 'submit', false ); ?>
+								</form>
+
+								<form method="post" action="" style="display: inline-block; margin-right: 10px;">
+									<?php wp_nonce_field( 'sqcdy_ics_import_nonce' ); ?>
 									<input type="hidden" name="action" value="import_preview">
 									<?php submit_button( __( 'Preview Import', 'squarecandy-acf-events-ics-import' ), 'secondary', 'submit', false ); ?>
 								</form>
@@ -165,8 +182,9 @@ function sqcdy_ics_import_admin_page() {
 								<p class="description" style="margin-top: 10px;">
 									<?php
 									printf(
-										/* translators: %1$s: Preview Import, %2$s: Run Import */
-										esc_html__( '%1$s will show you what events would be imported without actually creating them. %2$s will actually create the event posts in WordPress.', 'squarecandy-acf-events-ics-import' ),
+										/* translators: %1$s: Test Feed, %2$s: Preview Import, %3$s: Run Import */
+										esc_html__( '%1$s will test the feed URL and show diagnostic information. %2$s will show you what events would be imported without actually creating them. %3$s will actually create the event posts in WordPress.', 'squarecandy-acf-events-ics-import' ),
+										'<strong>' . esc_html__( 'Test Feed', 'squarecandy-acf-events-ics-import' ) . '</strong>',
 										'<strong>' . esc_html__( 'Preview Import', 'squarecandy-acf-events-ics-import' ) . '</strong>',
 										'<strong>' . esc_html__( 'Run Import', 'squarecandy-acf-events-ics-import' ) . '</strong>'
 									);
@@ -309,4 +327,59 @@ function sqcdy_ics_import_run() {
 	);
 
 	return SQCDY_Event_Importer::import_from_feed( $feed_url, $options );
+}
+
+/**
+ * Test ICS feed for debugging
+ */
+function sqcdy_ics_import_test_feed() {
+	$feed_url = get_option( 'sqcdy_ics_import_feed_url' );
+
+	if ( empty( $feed_url ) ) {
+		return array(
+			'error' => 'No feed URL configured',
+		);
+	}
+
+	$results = array(
+		'feed_url' => $feed_url,
+	);
+
+	// Test the raw feed fetch
+	$response = wp_remote_get( $feed_url, array( 'timeout' => 30 ) );
+
+	if ( is_wp_error( $response ) ) {
+		$results['fetch_error'] = $response->get_error_message();
+		return $results;
+	}
+
+	$response_code = wp_remote_retrieve_response_code( $response );
+	$results['http_status'] = $response_code;
+
+	if ( 200 !== $response_code ) {
+		$results['error'] = 'HTTP error ' . $response_code;
+		return $results;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$results['content_length'] = strlen( $body );
+
+	if ( empty( $body ) ) {
+		$results['error'] = 'Empty response body';
+		return $results;
+	}
+
+	// Count VEVENT blocks
+	$vevent_count = substr_count( $body, 'BEGIN:VEVENT' );
+	$results['vevent_blocks_found'] = $vevent_count;
+
+	// Test parsing
+	$events = SQCDY_ICS_Parser::parse_ics_content( $body );
+	$results['events_parsed'] = is_array( $events ) ? count( $events ) : 'Parse failed';
+
+	// Show first few lines of content
+	$lines = explode( "\n", $body );
+	$results['first_5_lines'] = implode( ' | ', array_slice( $lines, 0, 5 ) );
+
+	return $results;
 }
