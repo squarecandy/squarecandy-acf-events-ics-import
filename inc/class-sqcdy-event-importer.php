@@ -296,7 +296,17 @@ class SQCDY_Event_Importer {
 			update_field( 'city', $location_parts['city'], $post_id );
 			update_field( 'state', $location_parts['state'], $post_id );
 			update_field( 'zip', $location_parts['zip'], $post_id );
-			update_field( 'country', $location_parts['country'], $post_id );
+
+			// Handle country field with fallback to home country setting
+			$country = $location_parts['country'];
+			if ( empty( $country ) ) {
+				// Check for home country setting from Events options
+				$home_country = get_option( 'options_home_country', '' );
+				if ( ! empty( $home_country ) ) {
+					$country = $home_country;
+				}
+			}
+			update_field( 'country', $country, $post_id );
 		}
 
 		// Handle description data - add to short_description field as well as post content
