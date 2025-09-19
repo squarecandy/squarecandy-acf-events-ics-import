@@ -54,15 +54,12 @@ function sqcdy_ics_import_activate() {
 }
 
 // Initialize plugin
-add_action( 'admin_init', 'sqcdy_ics_import_init', 999 );
+add_action( 'init', 'sqcdy_ics_import_init', 20 );
 function sqcdy_ics_import_init() {
-	// Check dependencies
-	if ( ! post_type_exists( 'event' ) || ! function_exists( 'get_field' ) ) {
-		add_action( 'admin_notices', 'sqcdy_ics_import_dependency_notice' );
-		return;
-	}
+	// Check dependencies - run dependency notice check on admin_notices
+	add_action( 'admin_notices', 'sqcdy_ics_import_check_dependencies' );
 
-	// Load plugin files
+	// Always load plugin files - let the admin menu function handle dependency checks
 	require_once SQCDY_ICS_IMPORT_DIR . 'inc/class-sqcdy-ics-parser.php';
 	require_once SQCDY_ICS_IMPORT_DIR . 'inc/class-sqcdy-event-importer.php';
 	require_once SQCDY_ICS_IMPORT_DIR . 'inc/admin-pages.php';
@@ -72,6 +69,13 @@ function sqcdy_ics_import_init() {
 	if ( is_admin() ) {
 		add_action( 'admin_menu', 'sqcdy_ics_import_admin_menu' );
 		add_action( 'admin_init', 'sqcdy_ics_import_admin_init' );
+	}
+}
+
+// Check dependencies and show notice if needed
+function sqcdy_ics_import_check_dependencies() {
+	if ( ! post_type_exists( 'event' ) || ! function_exists( 'get_field' ) ) {
+		sqcdy_ics_import_dependency_notice();
 	}
 }
 
@@ -86,6 +90,11 @@ function sqcdy_ics_import_dependency_notice() {
 
 // Add admin menu
 function sqcdy_ics_import_admin_menu() {
+	// Only add menu if dependencies are met
+	if ( ! post_type_exists( 'event' ) || ! function_exists( 'get_field' ) ) {
+		return;
+	}
+
 	add_submenu_page(
 		'edit.php?post_type=event',
 		__( 'ICS Import', 'squarecandy-acf-events-ics-import' ),
