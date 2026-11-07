@@ -1,28 +1,19 @@
 <?php
-/*
-Plugin Name:       Square Candy ACF Events ICS Import
-Plugin URI:        https://github.com/squarecandy/squarecandy-acf-events-ics-import
-GitHub Plugin URI: https://github.com/squarecandy/squarecandy-acf-events-ics-import
-Primary Branch:    main
-Description:       Import ICS calendar feeds to create events in the Square Candy ACF Events plugin
-Version:           1.0.0
-Author:            Square Candy
-Author URI:        http://squarecandy.net
-Text Domain:       squarecandy-acf-events-ics-import
-Requires at least: 5.0
-Requires PHP:      7.4
-*/
-
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 // Define plugin constants
-define( 'SQCDY_ICS_IMPORT_VERSION', '1.0.0' );
+define( 'SQCDY_ICS_IMPORT_VERSION', 'version-1.0.0' );
 define( 'SQCDY_ICS_IMPORT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SQCDY_ICS_IMPORT_URL', plugin_dir_url( __FILE__ ) );
 define( 'SQCDY_ICS_IMPORT_BASENAME', plugin_basename( __FILE__ ) );
+
+// Square Candy Common Functions
+require_once SQCDY_ICS_IMPORT_DIR . 'inc/sqcdy-common.php';
+require_once SQCDY_ICS_IMPORT_DIR . 'inc/sqcdy-plugin.php';
+
 
 // Check dependencies on activation
 register_activation_hook( __FILE__, 'sqcdy_ics_import_activate' );
