@@ -5,7 +5,7 @@ Plugin URI:        https://github.com/squarecandy/squarecandy-acf-events-ics-imp
 GitHub Plugin URI: https://github.com/squarecandy/squarecandy-acf-events-ics-import
 Primary Branch:    main
 Description:       Import ICS calendar feeds to create events in the Square Candy ACF Events plugin
-Version:           1.0.0
+Version: 1.0.1
 Author:            Square Candy
 Author URI:        http://squarecandy.net
 Text Domain:       squarecandy-acf-events-ics-import

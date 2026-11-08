@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'SQCDY_ICS_IMPORT_VERSION', 'version-1.0.0' );
+define( 'SQCDY_ICS_IMPORT_VERSION', 'version-1.0.1' );
 define( 'SQCDY_ICS_IMPORT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SQCDY_ICS_IMPORT_URL', plugin_dir_url( __FILE__ ) );
 define( 'SQCDY_ICS_IMPORT_BASENAME', plugin_basename( __FILE__ ) );

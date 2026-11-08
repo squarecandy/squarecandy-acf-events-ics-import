@@ -1,6 +1,6 @@
 {
 	"name": "squarecandy-acf-events-ics-import",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Import ICS calendar feeds to create events in the Square Candy ACF Events plugin",
 	"repository": {
 		"type": "git",
